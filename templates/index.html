@@ -4,323 +4,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compress PDF - Free & Open Source</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind configuration (optional, for fonts etc.) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-blue': '#4285f4',
+                        'brand-blue-dark': '#357ae8',
+                        'brand-blue-light': '#f0f6ff',
+                        'brand-gray': {
+                            100: '#f8f9fa', // light bg
+                            200: '#dadce0', // border
+                            300: '#f0f0f0', // panel bg
+                            500: '#777777', // medium text
+                            700: '#555555', // dark text
+                            900: '#333333', // darkest text
+                        },
+                        'success-bg': '#e6f4ea',
+                        'success-text': '#2e7d32',
+                        'success-border': '#c8e6c9',
+                        'error-bg': '#fce8e6',
+                        'error-text': '#d32f2f',
+                        'error-border': '#f9d9d6',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* General Body and Container Styles */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #333;
-            line-height: 1.6;
+        /* For custom scrollbar styling for the file list if it gets too long */
+        .file-list-scrollable {
+            max-height: 150px; /* Adjust as needed */
+            overflow-y: auto;
         }
-        .container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 550px; /* Slightly wider for better layout */
-            box-sizing: border-box; /* Include padding in width */
-            margin: 20px; /* Add some margin for smaller screens */
-        }
-        h1 {
-            color: #4285f4; /* Google Blue */
-            margin-bottom: 30px;
-            font-weight: 500;
-            font-size: 2.2em; /* Slightly larger title */
-        }
-
-        /* Upload Area Styles */
-        .upload-area {
-            border: 2px dashed #dadce0;
-            padding: 40px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: border-color 0.3s ease, background-color 0.3s ease;
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-area:hover {
-            border-color: #4285f4;
-            background-color: #f0f6ff; /* Light blue tint on hover */
-        }
-        .upload-area input[type="file"] {
-            display: none; /* Hide default file input */
-        }
-        .upload-area p {
-            margin: 0;
-            color: #777;
-            font-size: 1.1em;
-            padding-top: 10px; /* Space between icon and text */
-        }
-        .upload-area .material-icons {
-            font-size: 48px;
-            color: #777;
-        }
-        .file-info {
-            margin-top: 15px;
-            font-size: 0.95em;
-            color: #555;
-            min-height: 20px; /* Reserve space to prevent layout shift */
-        }
-        .file-info strong {
-            color: #333;
-        }
-
-        /* Advanced Settings Styles */
-        .advanced-settings-toggle {
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        .advanced-settings-toggle button {
-            background-color: #607d8b; /* Blue Grey */
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
-            width: auto; /* Allow button to size to content */
-            min-width: unset; /* Override button min-width */
-        }
-        .advanced-settings-toggle button:hover {
-            background-color: #455a64;
-            transform: none; /* No translateY for this button */
-        }
-
-        .advanced-settings-panel {
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            text-align: left;
-            display: none; /* Hidden by default */
-        }
-        .advanced-settings-panel label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 500;
-            color: #555;
-        }
-        .advanced-settings-panel input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none; /* Remove default slider styles */
-            height: 8px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity .2s;
-            border-radius: 4px;
-        }
-        .advanced-settings-panel input[type="range"]:hover {
-            opacity: 1;
-        }
-        .advanced-settings-panel input[type="range"]::-webkit-slider-thumb {
+        /* Custom styling for range input thumb - Tailwind doesn't fully cover this */
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #4285f4;
+            background: #4285f4; /* brand-blue */
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .advanced-settings-panel input[type="range"]::-moz-range-thumb {
+        input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #4285f4;
+            background: #4285f4; /* brand-blue */
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        #imageQualityValue {
-            font-weight: bold;
-            color: #4285f4;
-            margin-left: 5px;
-        }
-
-
-        /* Main Button Styles */
-        button {
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
-            min-width: 180px; /* Ensure consistent button size */
-            display: inline-block; /* For alignment with spinner */
-        }
-        button:hover:not(:disabled) {
-            background-color: #357ae8;
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            background-color: #a0c3f7; /* Lighter blue for disabled */
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-
-        /* Flash Messages Styles */
-        .flash-messages {
-            margin-top: 25px;
-            padding: 0;
-            list-style: none; /* Remove bullet points */
-        }
-        .flash-messages li {
-            padding: 12px 20px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 0.95em;
-            text-align: left;
-        }
-        .flash-messages .success {
-            background-color: #e6f4ea; /* Light green for success */
-            color: #2e7d32; /* Dark green */
-            border: 1px solid #c8e6c9;
-        }
-        .flash-messages .error {
-            background-color: #fce8e6; /* Light red for error */
-            color: #d32f2f; /* Dark red */
-            border: 1px solid #f9d9d6;
-        }
-
-        /* Loading Spinner Styles */
-        .loading-spinner {
-            display: none; /* Hidden by default */
-            margin: 20px auto; /* Center the spinner */
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4285f4; /* Blue */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            border: none; /* FF adds a border by default */
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Compress PDFs</h1>
-        <form id="uploadForm" action="/compress" method="post" enctype="multipart/form-data">
-            <label for="pdf_file" class="upload-area">
-                <span class="material-icons">cloud_upload</span>
-                <p>Drag & Drop your PDFs here, or <strong>Click to Upload</strong></p>
-                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" multiple>
-                <div id="fileInfo" class="file-info"></div>
-            </label>
+<body class="font-sans bg-brand-gray-100 flex flex-col items-center justify-between min-h-screen text-brand-gray-900 antialiased">
 
-            <div class="advanced-settings-toggle">
-                <button type="button" id="toggleAdvancedSettings">Advanced Settings</button>
+    <!-- Header Section -->
+    <header class="w-full bg-white shadow-md py-4">
+        <div class="container mx-auto max-w-4xl flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <span class="text-xl font-bold text-brand-blue">
+                PDF Compressor
+                <span class="text-sm font-normal text-brand-gray-500">by Divyesh Vishwakarma</span>
+            </span>
+            <div class="flex items-center space-x-4">
+                <a href="https://github.com/divyesh1099" title="GitHub" target="_blank" rel="noopener" class="text-brand-gray-700 hover:text-brand-blue transition-colors duration-200">
+                    <!-- GitHub Icon SVG -->
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.026 2.747-1.026.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/motidivya/" title="LinkedIn" target="_blank" rel="noopener" class="text-brand-gray-700 hover:text-brand-blue transition-colors duration-200">
+                    <!-- LinkedIn Icon SVG -->
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                </a>
             </div>
-            <div id="advancedSettings" class="advanced-settings-panel">
-                <label for="imageQuality">Image Quality (0-100%): <span id="imageQualityValue">10</span></label>
-                <input type="range" id="imageQuality" name="image_quality" min="0" max="100" value="10">
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full flex items-center justify-center py-8 px-4">
+        <div class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-xl w-full max-w-lg">
+            <h1 class="text-3xl font-semibold text-brand-blue mb-8 text-center">Compress PDFs</h1>
+            
+            <form id="uploadForm" action="/compress" method="post" enctype="multipart/form-data" class="space-y-6">
+                <!-- File Upload Area -->
+                <label for="pdf_file" class="upload-area group block w-full p-8 border-2 border-dashed border-brand-gray-200 rounded-lg cursor-pointer hover:border-brand-blue hover:bg-brand-blue-light transition-colors duration-200 text-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <!-- Cloud Upload Icon SVG -->
+                        <svg class="w-12 h-12 text-brand-gray-500 group-hover:text-brand-blue transition-colors duration-200 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.75 5.75 0 01.734 11.094A4.5 4.5 0 016.75 19.5z" />
+                        </svg>
+                        <p class="text-brand-gray-500 text-lg">Drag & Drop your PDFs here, or</p>
+                        <p class="text-brand-blue font-medium text-lg">Click to Upload</p>
+                    </div>
+                    <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" multiple class="hidden">
+                </label>
+                <div id="fileInfo" class="text-sm text-brand-gray-700 min-h-[20px] file-list-scrollable">
+                    <!-- File information will be displayed here by JavaScript -->
+                    No files selected.
+                </div>
+
+                <!-- Advanced Settings Toggle -->
+                <div class="text-center">
+                    <button type="button" id="toggleAdvancedSettings" class="px-4 py-2 bg-gray-200 text-brand-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm font-medium">
+                        Advanced Settings
+                    </button>
+                </div>
+
+                <!-- Advanced Settings Panel (Hidden by default) -->
+                <div id="advancedSettings" class="hidden bg-brand-gray-300 p-4 rounded-md space-y-3">
+                    <div>
+                        <label for="imageQuality" class="block text-sm font-medium text-brand-gray-700 mb-1">
+                            Image Quality (0-100%): <span id="imageQualityValue" class="font-bold text-brand-blue">10</span>
+                        </label>
+                        <input type="range" id="imageQuality" name="image_quality" min="0" max="100" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-blue">
+                    </div>
+                </div>
+
+                <!-- Submit Button and Loading Spinner -->
+                <div class="text-center">
+                    <button type="submit" id="compressButton" class="w-full sm:w-auto bg-brand-blue text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-brand-blue-dark focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-opacity-50 transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                        Compress PDFs
+                    </button>
+                    <div id="loadingSpinner" class="hidden mx-auto mt-4 w-8 h-8 border-4 border-brand-gray-200 border-t-brand-blue rounded-full animate-spin"></div>
+                </div>
+            </form>
+
+            <!-- Flash Messages Area -->
+            <ul class="flash-messages mt-6 space-y-2">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <li class="p-3 rounded-md text-sm border {{ 'bg-success-bg text-success-text border-success-border' if category == 'success' else 'bg-error-bg text-error-text border-error-border' }}">
+                                {{ message }}
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <!-- Example Flash Messages (for testing UI without backend) -->
+                <!-- <li class="p-3 rounded-md text-sm border bg-success-bg text-success-text border-success-border">File compressed successfully!</li> -->
+                <!-- <li class="p-3 rounded-md text-sm border bg-error-bg text-error-text border-error-border">An error occurred.</li> -->
+            </ul>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full bg-gray-100 text-brand-gray-500 text-center py-6 px-4 text-sm">
+        &copy; <span id="currentYear"></span> <a href="https://github.com/divyesh1099" target="_blank" rel="noopener" class="text-brand-blue hover:underline font-medium">Divyesh Vishwakarma</a> &ndash;
+        <a href="https://www.linkedin.com/in/motidivya/" target="_blank" rel="noopener" class="text-brand-blue hover:underline font-medium">LinkedIn</a>
+        <span class="block sm:inline mt-1 sm:mt-0 text-xs text-gray-400">| Open Source. Made with ❤️ by a Dev for Developers.</span>
+    </footer>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50 p-4">
+        <div class="relative p-6 border-0 w-full max-w-md shadow-xl rounded-lg bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-xl leading-6 font-semibold text-brand-gray-900 mb-2" id="alertModalTitle">Notification</h3>
+                <div class="mt-2 px-2 py-3">
+                    <p class="text-base text-brand-gray-700" id="alertModalMessage"></p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="alertModalCloseButton" class="w-full px-4 py-2 bg-brand-blue text-white text-base font-medium rounded-md shadow-sm hover:bg-brand-blue-dark focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-opacity-50 transition-colors duration-200">
+                        OK
+                    </button>
+                </div>
             </div>
-
-            <button type="submit" id="compressButton">Compress PDFs</button>
-            <div id="loadingSpinner" class="loading-spinner"></div>
-        </form>
-
-        <ul class="flash-messages">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <li class="{{ category }}">{{ message }}</li>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </ul>
+        </div>
     </div>
 
     <script>
+        // DOM Element References
         const pdfFileInput = document.getElementById('pdf_file');
         const fileInfoDiv = document.getElementById('fileInfo');
         const compressButton = document.getElementById('compressButton');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const uploadForm = document.getElementById('uploadForm');
-
-        // Advanced Settings elements
         const toggleAdvancedSettingsButton = document.getElementById('toggleAdvancedSettings');
         const advancedSettingsPanel = document.getElementById('advancedSettings');
         const imageQualitySlider = document.getElementById('imageQuality');
         const imageQualityValueSpan = document.getElementById('imageQualityValue');
+        const currentYearSpan = document.getElementById('currentYear');
+
+        // Alert Modal Elements
+        const alertModal = document.getElementById('alertModal');
+        const alertModalMessage = document.getElementById('alertModalMessage');
+        const alertModalCloseButton = document.getElementById('alertModalCloseButton');
+
+        // Function to show custom alert modal
+        function showAlert(message, title = 'Notification') {
+            document.getElementById('alertModalTitle').textContent = title;
+            alertModalMessage.textContent = message;
+            alertModal.classList.remove('hidden');
+        }
+
+        // Event listener for closing custom alert modal
+        if(alertModalCloseButton) {
+            alertModalCloseButton.addEventListener('click', () => {
+                alertModal.classList.add('hidden');
+            });
+        }
+         // Close modal if user clicks outside of it
+        if(alertModal) {
+            alertModal.addEventListener('click', (event) => {
+                if (event.target === alertModal) { // Check if the click is on the backdrop
+                    alertModal.classList.add('hidden');
+                }
+            });
+        }
+
 
         // Function to update file info and button state
         function updateFileInfo() {
+            if (!pdfFileInput || !fileInfoDiv || !compressButton) return;
+
             if (pdfFileInput.files.length > 0) {
-                let fileListHtml = "<ul style='margin:0; padding-left:18px; text-align:left;'>";
+                let fileListHtml = "<ul class='list-disc list-inside space-y-1 text-left text-brand-gray-700'>";
                 let totalSize = 0;
                 for (let i = 0; i < pdfFileInput.files.length; i++) {
                     const file = pdfFileInput.files[i];
-                    fileListHtml += `<li><strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(2)} MB)</li>`;
+                    fileListHtml += `<li><span class="font-medium text-brand-gray-900">${file.name}</span> (${(file.size / (1024 * 1024)).toFixed(2)} MB)</li>`;
                     totalSize += file.size;
                 }
                 fileListHtml += "</ul>";
                 if (pdfFileInput.files.length > 1) {
-                    fileListHtml += `<div style="margin-top:6px;font-size:0.98em;color:#4285f4;">Total: ${(totalSize/(1024*1024)).toFixed(2)} MB</div>`;
+                    fileListHtml += `<div class="mt-2 text-sm font-medium text-brand-blue text-left">Total: ${(totalSize / (1024 * 1024)).toFixed(2)} MB</div>`;
                 }
                 fileInfoDiv.innerHTML = fileListHtml;
                 compressButton.disabled = false;
+                compressButton.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
                 fileInfoDiv.innerHTML = 'No files selected.';
                 compressButton.disabled = true;
+                compressButton.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
 
-        // Event listener for file input change
-        pdfFileInput.addEventListener('change', updateFileInfo);
+        // Event listeners
+        if (pdfFileInput) {
+            pdfFileInput.addEventListener('change', updateFileInfo);
+        }
 
-        // Initial check on page load
+        if (toggleAdvancedSettingsButton) {
+            toggleAdvancedSettingsButton.addEventListener('click', function() {
+                if (advancedSettingsPanel.classList.contains('hidden')) {
+                    advancedSettingsPanel.classList.remove('hidden');
+                    this.textContent = 'Hide Advanced Settings';
+                } else {
+                    advancedSettingsPanel.classList.add('hidden');
+                    this.textContent = 'Advanced Settings';
+                }
+            });
+        }
+
+        if (imageQualitySlider && imageQualityValueSpan) {
+            imageQualitySlider.addEventListener('input', function() {
+                imageQualityValueSpan.textContent = this.value;
+            });
+        }
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(event) {
+                if (pdfFileInput.files.length === 0 || compressButton.disabled) {
+                    event.preventDefault();
+                    showAlert('Please select at least one PDF file to compress.', 'Input Required');
+                    return;
+                }
+                compressButton.classList.add('hidden'); // Hide button
+                if(loadingSpinner) loadingSpinner.classList.remove('hidden'); // Show spinner
+            });
+        }
+        
+        // Initial setup on page load
         document.addEventListener('DOMContentLoaded', function() {
-            updateFileInfo();
-            imageQualityValueSpan.textContent = imageQualitySlider.value;
-        });
-
-        // Toggle Advanced Settings visibility
-        toggleAdvancedSettingsButton.addEventListener('click', function() {
-            if (advancedSettingsPanel.style.display === 'block') {
-                advancedSettingsPanel.style.display = 'none';
-                toggleAdvancedSettingsButton.textContent = 'Advanced Settings';
-            } else {
-                advancedSettingsPanel.style.display = 'block';
-                toggleAdvancedSettingsButton.textContent = 'Hide Advanced Settings';
+            updateFileInfo(); // Initial call to set button state
+            if (imageQualitySlider && imageQualityValueSpan) {
+                 imageQualityValueSpan.textContent = imageQualitySlider.value; // Set initial slider value display
+            }
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear(); // Set current year in footer
             }
         });
 
-        // Update image quality value display as slider moves
-        imageQualitySlider.addEventListener('input', function() {
-            imageQualityValueSpan.textContent = this.value;
-        });
+        // Drag and Drop functionality for the upload area
+        const uploadArea = document.querySelector('.upload-area');
+        if (uploadArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
 
-        // Form submission listener
-        uploadForm.addEventListener('submit', function(event) {
-            if (pdfFileInput.files.length === 0 || compressButton.disabled) {
-                event.preventDefault();
-                alert('Please select at least one PDF file.');
-                return;
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
-            compressButton.style.display = 'none';
-            loadingSpinner.style.display = 'block';
-        });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('bg-brand-blue-light', 'border-brand-blue'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('bg-brand-blue-light', 'border-brand-blue'), false);
+            });
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                let dt = e.dataTransfer;
+                let files = dt.files;
+                pdfFileInput.files = files; // Assign dropped files to the input
+                updateFileInfo(); // Update UI
+            }
+        }
+
     </script>
 </body>
 </html>
