@@ -193,3 +193,5 @@ MIT License – free for commercial and personal use.
 
 **Happy compressing!**
 *For professional projects, consulting, or dev work, [contact me on LinkedIn](https://www.linkedin.com/in/motidivya/).*
+
+❤️Moti
