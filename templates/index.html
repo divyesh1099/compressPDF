@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compress PDF - Free & Open Source</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* General Body and Container Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 550px; /* Slightly wider for better layout */
+            box-sizing: border-box; /* Include padding in width */
+            margin: 20px; /* Add some margin for smaller screens */
+        }
+        h1 {
+            color: #4285f4; /* Google Blue */
+            margin-bottom: 30px;
+            font-weight: 500;
+            font-size: 2.2em; /* Slightly larger title */
+        }
+
+        /* Upload Area Styles */
+        .upload-area {
+            border: 2px dashed #dadce0;
+            padding: 40px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-area:hover {
+            border-color: #4285f4;
+            background-color: #f0f6ff; /* Light blue tint on hover */
+        }
+        .upload-area input[type="file"] {
+            display: none; /* Hide default file input */
+        }
+        .upload-area p {
+            margin: 0;
+            color: #777;
+            font-size: 1.1em;
+            padding-top: 10px; /* Space between icon and text */
+        }
+        .upload-area .material-icons {
+            font-size: 48px;
+            color: #777;
+        }
+        .file-info {
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #555;
+            min-height: 20px; /* Reserve space to prevent layout shift */
+        }
+        .file-info strong {
+            color: #333;
+        }
+
+        /* Advanced Settings Styles */
+        .advanced-settings-toggle {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .advanced-settings-toggle button {
+            background-color: #607d8b; /* Blue Grey */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            width: auto; /* Allow button to size to content */
+            min-width: unset; /* Override button min-width */
+        }
+        .advanced-settings-toggle button:hover {
+            background-color: #455a64;
+            transform: none; /* No translateY for this button */
+        }
+
+        .advanced-settings-panel {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            text-align: left;
+            display: none; /* Hidden by default */
+        }
+        .advanced-settings-panel label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #555;
+        }
+        .advanced-settings-panel input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none; /* Remove default slider styles */
+            height: 8px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 4px;
+        }
+        .advanced-settings-panel input[type="range"]:hover {
+            opacity: 1;
+        }
+        .advanced-settings-panel input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4285f4;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .advanced-settings-panel input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4285f4;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #imageQualityValue {
+            font-weight: bold;
+            color: #4285f4;
+            margin-left: 5px;
+        }
+
+
+        /* Main Button Styles */
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+            min-width: 180px; /* Ensure consistent button size */
+            display: inline-block; /* For alignment with spinner */
+        }
+        button:hover:not(:disabled) {
+            background-color: #357ae8;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #a0c3f7; /* Lighter blue for disabled */
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Flash Messages Styles */
+        .flash-messages {
+            margin-top: 25px;
+            padding: 0;
+            list-style: none; /* Remove bullet points */
+        }
+        .flash-messages li {
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            text-align: left;
+        }
+        .flash-messages .success {
+            background-color: #e6f4ea; /* Light green for success */
+            color: #2e7d32; /* Dark green */
+            border: 1px solid #c8e6c9;
+        }
+        .flash-messages .error {
+            background-color: #fce8e6; /* Light red for error */
+            color: #d32f2f; /* Dark red */
+            border: 1px solid #f9d9d6;
+        }
+
+        /* Loading Spinner Styles */
+        .loading-spinner {
+            display: none; /* Hidden by default */
+            margin: 20px auto; /* Center the spinner */
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4285f4; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Compress PDF</h1>
+        <form id="uploadForm" action="/compress" method="post" enctype="multipart/form-data">
+            <label for="pdf_file" class="upload-area">
+                <span class="material-icons">cloud_upload</span>
+                <p>Drag & Drop your PDF here, or <strong>Click to Upload</strong></p>
+                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf">
+                <div id="fileInfo" class="file-info"></div>
+            </label>
+
+            <div class="advanced-settings-toggle">
+                <button type="button" id="toggleAdvancedSettings">Advanced Settings</button>
+            </div>
+            <div id="advancedSettings" class="advanced-settings-panel">
+                <label for="imageQuality">Image Quality (0-100%): <span id="imageQualityValue">10</span></label>
+                <input type="range" id="imageQuality" name="image_quality" min="0" max="100" value="10">
+            </div>
+
+            <button type="submit" id="compressButton">Compress PDF</button>
+            <div id="loadingSpinner" class="loading-spinner"></div>
+        </form>
+
+        <ul class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </ul>
+    </div>
+
+    <script>
+        const pdfFileInput = document.getElementById('pdf_file');
+        const fileInfoDiv = document.getElementById('fileInfo');
+        const compressButton = document.getElementById('compressButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // Advanced Settings elements
+        const toggleAdvancedSettingsButton = document.getElementById('toggleAdvancedSettings');
+        const advancedSettingsPanel = document.getElementById('advancedSettings');
+        const imageQualitySlider = document.getElementById('imageQuality');
+        const imageQualityValueSpan = document.getElementById('imageQualityValue');
+
+        // Function to update file info and button state
+        function updateFileInfo() {
+            if (pdfFileInput.files.length > 0) {
+                const file = pdfFileInput.files[0];
+                fileInfoDiv.innerHTML = `Selected: <strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                compressButton.disabled = false;
+            } else {
+                fileInfoDiv.innerHTML = 'No file selected.'; // Clear if no file
+                compressButton.disabled = true;
+            }
+        }
+
+        // Event listener for file input change
+        pdfFileInput.addEventListener('change', updateFileInfo);
+
+        // Initial check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFileInfo();
+            // Initialize slider value display
+            imageQualityValueSpan.textContent = imageQualitySlider.value;
+        });
+
+        // Toggle Advanced Settings visibility
+        toggleAdvancedSettingsButton.addEventListener('click', function() {
+            if (advancedSettingsPanel.style.display === 'block') {
+                advancedSettingsPanel.style.display = 'none';
+                toggleAdvancedSettingsButton.textContent = 'Advanced Settings';
+            } else {
+                advancedSettingsPanel.style.display = 'block';
+                toggleAdvancedSettingsButton.textContent = 'Hide Advanced Settings';
+            }
+        });
+
+        // Update image quality value display as slider moves
+        imageQualitySlider.addEventListener('input', function() {
+            imageQualityValueSpan.textContent = this.value;
+        });
+
+
+        // Form submission listener
+        uploadForm.addEventListener('submit', function(event) {
+            // Prevent submission if no file is selected
+            if (pdfFileInput.files.length === 0 || compressButton.disabled) {
+                event.preventDefault(); // Stop the form from submitting
+                alert('Please select a PDF file first.'); // Basic alert for now
+                return;
+            }
+
+            // Show loading spinner and disable button
+            compressButton.style.display = 'none'; // Hide button
+            loadingSpinner.style.display = 'block'; // Show spinner
+        });
+    </script>
+</body>
+</html>
