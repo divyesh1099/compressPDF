@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Compression Success!</title>
+    <title>PDF Compression Results</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -16,71 +16,80 @@
             min-height: 100vh;
             margin: 0;
             color: #333;
-            line-height: 1.6;
         }
         .container {
             background-color: #fff;
-            padding: 40px;
+            padding: 40px 30px 30px 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
             width: 100%;
-            max-width: 550px;
-            box-sizing: border-box;
+            max-width: 760px;
             margin: 20px;
+            text-align: center;
         }
         h1 {
-            color: #2e7d32; /* Google Green for success */
+            color: #2e7d32;
             margin-bottom: 20px;
             font-weight: 500;
-            font-size: 2.2em;
+            font-size: 2.1em;
         }
         .success-icon {
             font-size: 80px;
             color: #2e7d32;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
-        .details p {
-            font-size: 1.1em;
-            margin-bottom: 10px;
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0 35px 0;
+            font-size: 1.05em;
         }
-        .details strong {
+        .results-table th, .results-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ececec;
+            vertical-align: middle;
+        }
+        .results-table th {
+            background-color: #eaf8f2;
+            color: #222;
+            font-weight: 600;
+        }
+        .results-table td {
             color: #333;
         }
-        .download-button {
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.2em;
+        .download-link {
+            background: #4285f4;
+            color: #fff !important;
+            border-radius: 4px;
+            padding: 7px 15px;
             font-weight: 500;
-            text-decoration: none; /* For anchor tag */
-            display: inline-block; /* Make it behave like a button */
-            margin-top: 30px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-block;
         }
-        .download-button:hover {
-            background-color: #357ae8;
-            transform: translateY(-2px);
+        .download-link:hover {
+            background: #357ae8;
         }
         .back-button {
             background-color: #f0f0f0;
             color: #555;
             border: 1px solid #ccc;
-            padding: 10px 20px;
+            padding: 10px 22px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 1em;
             text-decoration: none;
+            margin-top: 18px;
+            transition: background-color 0.3s, transform 0.2s;
             display: inline-block;
-            margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .back-button:hover {
             background-color: #e0e0e0;
             transform: translateY(-1px);
+        }
+        @media (max-width: 700px) {
+            .container { padding: 20px 2vw; }
+            .results-table th, .results-table td { font-size: 0.97em; padding: 7px 4px; }
         }
     </style>
 </head>
@@ -88,16 +97,45 @@
     <div class="container">
         <span class="material-icons success-icon">check_circle</span>
         <h1>Compression Complete!</h1>
-        <div class="details">
-            <p>Original Size: <strong>{{ "%.2f" | format(original_size / (1024*1024)) }} MB</strong></p>
-            <p>Compressed Size: <strong>{{ "%.2f" | format(compressed_size / (1024*1024)) }} MB</strong></p>
-            <p>Reduction: <strong>{{ "%.2f" | format(reduction_percent) }}%</strong></p>
-        </div>
-        <a href="{{ url_for('download', filetoken=filetoken) }}" class="download-button">
-            <span class="material-icons" style="vertical-align: middle;">file_download</span> Download Compressed PDF
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Original Size</th>
+                    <th>Compressed Size</th>
+                    <th>Reduction</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for file in results %}
+                <tr>
+                    <td style="word-break: break-all;">{{ file.orig_name }}</td>
+                    <td>
+                        {{ "%.2f" | format(file.original_size / (1024*1024)) }} MB
+                    </td>
+                    <td>
+                        {{ "%.2f" | format(file.compressed_size / (1024*1024)) }} MB
+                    </td>
+                    <td>
+                        <span style="color: #2e7d32; font-weight: 600;">
+                            {{ "%.2f" | format(file.reduction_percent) }}%
+                        </span>
+                    </td>
+                    <td>
+                        <a class="download-link"
+                           href="{{ url_for('download', filetoken=file.token) }}">
+                            <span class="material-icons" style="font-size:18px; vertical-align:-3px;">file_download</span>
+                            Download
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('index') }}" class="back-button">
+            Compress More PDFs
         </a>
-        <br>
-        <a href="{{ url_for('index') }}" class="back-button">Compress Another PDF</a>
     </div>
 </body>
 </html>

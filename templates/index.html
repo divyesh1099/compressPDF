@@ -219,12 +219,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Compress PDF</h1>
+        <h1>Compress PDFs</h1>
         <form id="uploadForm" action="/compress" method="post" enctype="multipart/form-data">
             <label for="pdf_file" class="upload-area">
                 <span class="material-icons">cloud_upload</span>
-                <p>Drag & Drop your PDF here, or <strong>Click to Upload</strong></p>
-                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf">
+                <p>Drag & Drop your PDFs here, or <strong>Click to Upload</strong></p>
+                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" multiple>
                 <div id="fileInfo" class="file-info"></div>
             </label>
 
@@ -236,7 +236,7 @@
                 <input type="range" id="imageQuality" name="image_quality" min="0" max="100" value="10">
             </div>
 
-            <button type="submit" id="compressButton">Compress PDF</button>
+            <button type="submit" id="compressButton">Compress PDFs</button>
             <div id="loadingSpinner" class="loading-spinner"></div>
         </form>
 
@@ -267,11 +267,21 @@
         // Function to update file info and button state
         function updateFileInfo() {
             if (pdfFileInput.files.length > 0) {
-                const file = pdfFileInput.files[0];
-                fileInfoDiv.innerHTML = `Selected: <strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                let fileListHtml = "<ul style='margin:0; padding-left:18px; text-align:left;'>";
+                let totalSize = 0;
+                for (let i = 0; i < pdfFileInput.files.length; i++) {
+                    const file = pdfFileInput.files[i];
+                    fileListHtml += `<li><strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(2)} MB)</li>`;
+                    totalSize += file.size;
+                }
+                fileListHtml += "</ul>";
+                if (pdfFileInput.files.length > 1) {
+                    fileListHtml += `<div style="margin-top:6px;font-size:0.98em;color:#4285f4;">Total: ${(totalSize/(1024*1024)).toFixed(2)} MB</div>`;
+                }
+                fileInfoDiv.innerHTML = fileListHtml;
                 compressButton.disabled = false;
             } else {
-                fileInfoDiv.innerHTML = 'No file selected.'; // Clear if no file
+                fileInfoDiv.innerHTML = 'No files selected.';
                 compressButton.disabled = true;
             }
         }
@@ -282,7 +292,6 @@
         // Initial check on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateFileInfo();
-            // Initialize slider value display
             imageQualityValueSpan.textContent = imageQualitySlider.value;
         });
 
@@ -302,19 +311,15 @@
             imageQualityValueSpan.textContent = this.value;
         });
 
-
         // Form submission listener
         uploadForm.addEventListener('submit', function(event) {
-            // Prevent submission if no file is selected
             if (pdfFileInput.files.length === 0 || compressButton.disabled) {
-                event.preventDefault(); // Stop the form from submitting
-                alert('Please select a PDF file first.'); // Basic alert for now
+                event.preventDefault();
+                alert('Please select at least one PDF file.');
                 return;
             }
-
-            // Show loading spinner and disable button
-            compressButton.style.display = 'none'; // Hide button
-            loadingSpinner.style.display = 'block'; // Show spinner
+            compressButton.style.display = 'none';
+            loadingSpinner.style.display = 'block';
         });
     </script>
 </body>
