@@ -18,6 +18,8 @@ import pikepdf
 from typing import Dict, Any
 from werkzeug.utils import secure_filename
 
+import io
+from zipfile import ZipFile
 # ──────────────── Config & Globals ────────────────
 app               = Flask(__name__)
 UPLOAD_DIR        = pathlib.Path("uploads")
@@ -231,6 +233,29 @@ def download(filetoken):
         try: path.unlink(missing_ok=True)
         except Exception: pass
     return response
+
+@app.route("/download-all")
+def download_all():
+    files = list(OUT_DIR.glob("*_compressed_*"))
+    if not files:
+        flash("No files available for bulk download.", "error")
+        return redirect(url_for("index"))
+
+    # In-memory zip
+    zip_buffer = io.BytesIO()
+    with ZipFile(zip_buffer, "w") as zipf:
+        for file in files:
+            # Inside zip, store with original filename
+            download_name = file.name.split("_compressed_", 1)[-1]
+            zipf.write(file, arcname=download_name)
+
+    zip_buffer.seek(0)
+    return send_file(
+        zip_buffer,
+        as_attachment=True,
+        download_name="compressed_pdfs.zip",
+        mimetype="application/zip"
+    )
 
 # ─────────────────────────── main ──────────────────────────
 if __name__ == "__main__":
